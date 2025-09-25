@@ -1,2 +1,3 @@
 python-dotenv
 djangorestframework 
+drf-yasg
