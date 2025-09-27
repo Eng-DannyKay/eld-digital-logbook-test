@@ -7,8 +7,61 @@ import MapView from "../../components/Map/MapView";
 import ComplianceSummary from "../../components/Summary/ComplianceSummary";
 import TripRecap from "../../components/Summary/TripRecap";
 import { useTripStore } from "../../store/tripStore";
-import type { DailyLog } from "../../core/types/trip";
-import { generateDutyChart } from "../../core/utils/logUtils";
+import type { DailyLog, Activity } from "../../core/types/trip";
+
+
+type DutyEntry = {
+  from: number;
+  to: number;
+  status: "Driving" | "Off" | "OnDuty" | "Sleeper";
+};
+
+
+/**
+ * Maps an activity type to a duty entry status.
+ * @param {Activity["type"]} type - Activity type.
+ * @returns {DutyEntry["status"]} - Duty entry status.
+ * @example
+ * mapActivityToStatus("driving") // "Driving"
+ * mapActivityToStatus("on_duty") // "OnDuty"
+ * mapActivityToStatus("off_duty") // "Off"
+ * mapActivityToStatus("sleeper") // "Sleeper"
+ * mapActivityToStatus("break") // "Off"
+ * mapActivityToStatus("unknown_type") // "Off"
+ */
+function mapActivityToStatus(type: Activity["type"]): DutyEntry["status"] {
+  switch (type) {
+    case "driving":
+      return "Driving";
+    case "on_duty":
+      return "OnDuty";
+    case "off_duty":
+      return "Off";
+    case "sleeper":
+      return "Sleeper";
+    case "break":
+      return "Off"; 
+    default:
+      return "Off";
+  }
+}
+
+
+
+function formatLogs(dailyLogs: DailyLog[]): {
+  day: number;
+  entries: DutyEntry[];
+}[] {
+  return dailyLogs.map((log) => ({
+    day: log.day,
+    entries: log.activities.map((activity) => {
+      const status = mapActivityToStatus(activity.type);
+      const [startHour] = activity.start.split(":").map(Number);
+      const [endHour] = activity.end.split(":").map(Number);
+      return { from: startHour, to: endHour, status };
+    }),
+  }));
+}
 
 export default function TripDetails() {
   const navigate = useNavigate();
@@ -21,28 +74,8 @@ export default function TripDetails() {
 
   const { calculation, trip } = currentTrip;
 
-  const formattedLogs = calculation.daily_logs.map((log: DailyLog) => ({
-    day: log.day,
-    entries: log.activities.map((activity) => {
-      let status: "Driving" | "Off" | "OnDuty" | "Sleeper" = "Off";
-      switch (activity.type) {
-        case "driving":
-          status = "Driving";
-          break;
-        case "break":
-          break;
-        case "on_duty":
-          status = "OnDuty";
-          break;
-        case "off_duty":
-          status = "Sleeper";
-          break;
-      }
-      const [startH] = activity.start.split(":").map(Number);
-      const [endH] = activity.end.split(":").map(Number);
-      return { from: startH, to: endH, status };
-    }),
-  }));
+
+  const formattedLogs = formatLogs(calculation.daily_logs);
 
   const compliance = {
     hoursToday:
@@ -56,6 +89,7 @@ export default function TripDetails() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 space-y-10">
+      {/* Header */}
       <header className="flex items-center justify-between">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -73,6 +107,7 @@ export default function TripDetails() {
         </Button>
       </header>
 
+      {/* Route + Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <motion.div
           className="lg:col-span-2 bg-white rounded-lg shadow-md p-5"
@@ -80,9 +115,6 @@ export default function TripDetails() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Alerts (if we later add them from API) */}
-          {/* <ComplianceAlert alerts={[]} /> */}
-
           <h2 className="font-semibold text-lg mb-3 text-secondary">
             Route Overview
           </h2>
@@ -114,6 +146,7 @@ export default function TripDetails() {
         </motion.aside>
       </div>
 
+   
       <motion.section
         className="bg-white rounded-lg shadow-md p-6"
         initial={{ opacity: 0, y: 30 }}
@@ -145,7 +178,12 @@ export default function TripDetails() {
               date: log.date,
               driver: "Professional Driver",
               vehicle: "Truck #1001",
-              dutyChart: generateDutyChart(log.activities),
+              dutyEntries: log.activities.map((a) => {
+                const status = mapActivityToStatus(a.type);
+                const [from] = a.start.split(":").map(Number);
+                const [to] = a.end.split(":").map(Number);
+                return { from, to, status };
+              }),
               summary: {
                 drivingTime: `${log.activities
                   .filter((a) => a.type === "driving")
@@ -164,6 +202,7 @@ export default function TripDetails() {
         />
       </motion.section>
 
+      {/* Footer */}
       <footer className="flex justify-end gap-4">
         <Button variant="secondary">Print</Button>
         <Button variant="primary">Export PDF</Button>

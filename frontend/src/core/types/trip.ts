@@ -18,7 +18,7 @@ export interface RouteInstruction {
 };
 
 export interface Activity {
-  type: "driving" | "break" | "on_duty" | "off_duty";
+  type: "driving" | "break" | "on_duty" | "off_duty"| "sleeper";
   duration: number;
   start: string; 
   end: string;   
