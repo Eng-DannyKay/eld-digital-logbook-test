@@ -4,8 +4,7 @@ import DutyStatusChart from "./DutyStatusChart";
 import LogSummaryCard from "./LogSummaryCard";
 import RemarksBox from "./RemarksBox";
 
-
-type DutyChart = boolean[][]; 
+type DutyChart = boolean[][];
 
 type Sheet = {
   date: string;
@@ -21,14 +20,20 @@ type Sheet = {
   remarks: string;
 };
 
-export default function ELDLogSheet({ logData }: { readonly logData?: { readonly sheets: readonly Sheet[] } }) {
+export default function ELDLogSheet({
+  logData,
+}: {
+  readonly logData?: { readonly sheets: readonly Sheet[] };
+}) {
   const [currentSheet, setCurrentSheet] = useState(0);
 
   if (!logData?.sheets) {
     return (
       <div className="bg-gray-100 rounded-lg p-8 text-center">
         <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-600">ELD log sheets will be generated after planning</p>
+        <p className="text-gray-600">
+          ELD log sheets will be generated after planning
+        </p>
       </div>
     );
   }
@@ -56,7 +61,11 @@ export default function ELDLogSheet({ logData }: { readonly logData?: { readonly
               Day {currentSheet + 1} of {logData.sheets.length}
             </span>
             <button
-              onClick={() => setCurrentSheet(Math.min(logData.sheets.length - 1, currentSheet + 1))}
+              onClick={() =>
+                setCurrentSheet(
+                  Math.min(logData.sheets.length - 1, currentSheet + 1)
+                )
+              }
               disabled={currentSheet === logData.sheets.length - 1}
               className="px-3 py-1 bg-primary-light text-white rounded disabled:opacity-50"
             >
@@ -66,31 +75,46 @@ export default function ELDLogSheet({ logData }: { readonly logData?: { readonly
         )}
       </div>
 
-    
       <div className="grid grid-cols-3 gap-4 text-sm bg-gray-50 p-4 rounded-lg border mb-6">
         <div>
-          <span className="font-semibold text-secondary">Date:</span> {sheet.date}
+          <span className="font-semibold text-secondary">Date:</span>{" "}
+          {sheet.date}
         </div>
         <div>
-          <span className="font-semibold text-secondary">Driver:</span> {sheet.driver}
+          <span className="font-semibold text-secondary">Driver:</span>{" "}
+          {sheet.driver}
         </div>
         <div>
-          <span className="font-semibold text-secondary">Vehicle:</span> {sheet.vehicle}
+          <span className="font-semibold text-secondary">Vehicle:</span>{" "}
+          {sheet.vehicle}
         </div>
       </div>
 
-   
       <DutyStatusChart dutyChart={sheet.dutyChart} />
 
-     
       <div className="grid grid-cols-4 gap-4 text-sm my-6">
-        <LogSummaryCard label="Driving Time" value={sheet.summary.drivingTime} color="primary" />
-        <LogSummaryCard label="On Duty Time" value={sheet.summary.onDutyTime} color="accent-success" />
-        <LogSummaryCard label="Cycle Hours" value={sheet.summary.cycleHours} color="accent-warning" />
-        <LogSummaryCard label="Available Hours" value={sheet.summary.availableHours} color="secondary" />
+        <LogSummaryCard
+          label="Driving Time"
+          value={sheet.summary.drivingTime}
+          color="primary"
+        />
+        <LogSummaryCard
+          label="On Duty Time"
+          value={sheet.summary.onDutyTime}
+          color="accent-success"
+        />
+        <LogSummaryCard
+          label="Cycle Hours"
+          value={sheet.summary.cycleHours}
+          color="accent-warning"
+        />
+        <LogSummaryCard
+          label="Available Hours"
+          value={sheet.summary.availableHours}
+          color="secondary"
+        />
       </div>
 
-    
       <RemarksBox remarks={sheet.remarks} />
     </div>
   );

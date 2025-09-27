@@ -1,5 +1,8 @@
-
-type Entry = { from: number; to: number; status: "Driving" | "Off" | "Sleeper" | "OnDuty" };
+type Entry = {
+  from: number;
+  to: number;
+  status: "Driving" | "Off" | "Sleeper" | "OnDuty";
+};
 
 const statusStyle: Record<Entry["status"], string> = {
   Driving: "bg-primary text-white",
@@ -8,7 +11,13 @@ const statusStyle: Record<Entry["status"], string> = {
   OnDuty: "bg-accent-warning text-white",
 };
 
-export default function ELDLogRenderer({ day, entries }: { readonly day: number; readonly entries: readonly Entry[] }) {
+export default function ELDLogRenderer({
+  day,
+  entries,
+}: {
+  readonly day: number;
+  readonly entries: readonly Entry[];
+}) {
   return (
     <div className="space-y-2">
       <h3 className="font-medium text-secondary">Day {day}</h3>
@@ -16,7 +25,9 @@ export default function ELDLogRenderer({ day, entries }: { readonly day: number;
         {entries.map((e) => (
           <div
             key={`${e.from}-${e.to}-${e.status}`}
-            className={`absolute top-0 h-20 ${statusStyle[e.status]} opacity-90 flex items-end pl-1`}
+            className={`absolute top-0 h-20 ${
+              statusStyle[e.status]
+            } opacity-90 flex items-end pl-1`}
             style={{
               left: `${(e.from / 24) * 100}%`,
               width: `${((e.to - e.from) / 24) * 100}%`,
@@ -26,7 +37,6 @@ export default function ELDLogRenderer({ day, entries }: { readonly day: number;
           </div>
         ))}
 
-        {/* Hour ticks */}
         <div className="absolute bottom-0 w-full flex justify-between text-[10px] text-gray-500 px-1">
           {Array.from({ length: 7 }).map((_, i) => {
             const hour = i * 4;
