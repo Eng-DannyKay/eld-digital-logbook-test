@@ -202,10 +202,8 @@ export default function TripDetails() {
         />
       </motion.section>
 
-      {/* Footer */}
       <footer className="flex justify-end gap-4">
-        <Button variant="secondary">Print</Button>
-        <Button variant="primary">Export PDF</Button>
+  <Button variant="primary" onClick={() => window.print()}>Print Trip Details</Button>
       </footer>
     </div>
   );
