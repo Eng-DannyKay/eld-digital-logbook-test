@@ -1,4 +1,3 @@
-
 type Props = {
   readonly label: string;
   readonly value: string;

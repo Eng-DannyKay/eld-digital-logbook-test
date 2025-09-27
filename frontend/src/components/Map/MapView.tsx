@@ -1,63 +1,42 @@
-import React from "react";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Polyline,
-  Popup,
-} from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import { Route, Navigation } from "lucide-react";
+import { useEffect, useRef } from "react";
 
-type Props = {
-  route?: { lat: number; lng: number }[];
-  markers?: { lat: number; lng: number; label?: string }[];
+type MapViewProps = {
+  readonly from: string;
+  readonly to: string;
+  readonly waypoints?: readonly string[];
 };
 
-export default function MapView({ route = [], markers = [] }: Props) {
-  const center = route.length
-    ? [route[0].lat, route[0].lng]
-    : [39.8283, -98.5795]; // default: US center
+export default function MapView({ from, to, waypoints = [] }: MapViewProps) {
+  const mapRef = useRef<HTMLDivElement>(null);
 
-  return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-        <Route className="w-6 h-6 text-blue-600 mr-2" />
-        Route Overview
-      </h3>
+  useEffect(() => {
+    if (!mapRef.current) return;
 
-      <div className="h-[400px] w-full rounded-lg overflow-hidden border border-gray-200">
-        <MapContainer
-          center={center as any}
-          zoom={6}
-          style={{ height: "100%", width: "100%" }}
-        >
-          <TileLayer
-            attribution="© OpenStreetMap contributors"
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          {markers.map((m, i) => (
-            <Marker key={i} position={[m.lat, m.lng] as [number, number]}>
-              <Popup>{m.label || "Stop"}</Popup>
-            </Marker>
-          ))}
-          {route.length > 0 && (
-            <Polyline
-              positions={route.map((p) => [p.lat, p.lng] as [number, number])}
-              pathOptions={{ color: "#2563eb", weight: 4 }}
-            />
-          )}
-        </MapContainer>
-      </div>
+    const map = new google.maps.Map(mapRef.current, {
+      zoom: 6,
+      center: { lat: 7.9465, lng: -1.0232 }, // Ghana center
+    });
 
-      {route.length === 0 && (
-        <div className="bg-gray-100 rounded-lg p-8 text-center mt-4">
-          <Navigation className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-          <p className="text-gray-600">
-            Route map will appear here after planning
-          </p>
-        </div>
-      )}
-    </div>
-  );
+    const directionsService = new google.maps.DirectionsService();
+    const directionsRenderer = new google.maps.DirectionsRenderer();
+    directionsRenderer.setMap(map);
+
+    directionsService.route(
+      {
+        origin: from,
+        destination: to,
+        waypoints: waypoints.map((loc) => ({ location: loc, stopover: true })),
+        travelMode: google.maps.TravelMode.DRIVING,
+      },
+      (result, status) => {
+        if (status === "OK" && result) {
+          directionsRenderer.setDirections(result);
+        } else {
+          console.error("Directions request failed due to " + status);
+        }
+      }
+    );
+  }, [from, to, waypoints]);
+
+  return <div ref={mapRef} className="w-full h-[400px] rounded-lg shadow" />;
 }

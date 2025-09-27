@@ -1,7 +1,10 @@
-
 type Compliance = { hoursToday: number; cycleUsed: number; remaining: number };
 
-export default function ComplianceSummary({ compliance }: { readonly compliance: Compliance }) {
+export default function ComplianceSummary({
+  compliance,
+}: {
+  readonly compliance: Compliance;
+}) {
   return (
     <div className="bg-gray-50 rounded-lg p-4 text-sm">
       <div className="flex justify-between mb-2">
