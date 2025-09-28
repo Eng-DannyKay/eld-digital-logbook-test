@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import InputCard from "../InputCard/InputCard";
 import { Button } from "../Button/Button";
 import { useTripStore } from "../../store/tripStore";
+import { useToastStore } from "../../store/toastStore";
 import LocationInput from "../LocationInput/LocationInput";
 
 export default function TripForm() {
@@ -29,6 +30,9 @@ export default function TripForm() {
   !form.dropoffLocation ||
   form.currentCycleUsed < 0 ||
   form.currentCycleUsed > 70;
+
+const showToast = useToastStore((state) => state.showToast);
+
 
   const { calculateTripAction, loading, error } = useTripStore();
   const navigate = useNavigate();
@@ -63,7 +67,13 @@ export default function TripForm() {
       dropoff_location: form.dropoffLocation,
       current_cycle_used: form.currentCycleUsed.toString(),
     });
-    navigate("/trip");
+   
+    if (!error) {
+      showToast("Trip planned successfully!", "success");
+      navigate("/trip");
+    }else{
+      showToast(`Error:Failed to calculate trip ${error}`, "error");
+    }
   };
 
   return (
@@ -88,7 +98,7 @@ export default function TripForm() {
               max="70"
               step="0.5"
               value={form.currentCycleUsed}
-              onChange={(e) => handleChange("currentCycleUsed", parseFloat(e.target.value) || 0)}
+              onChange={(e) => handleChange("currentCycleUsed", parseFloat(e.target.value))}
               placeholder="0"
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
               required
@@ -123,7 +133,9 @@ export default function TripForm() {
         </InputCard>
       </div>
 
-      {error && <p className="text-red-600 text-center">{error}</p>}
+      {error && (
+        <p className="text-red-600 text-center">{error}</p>
+      )}
 
       <div className="flex justify-center pt-4">
         <Button

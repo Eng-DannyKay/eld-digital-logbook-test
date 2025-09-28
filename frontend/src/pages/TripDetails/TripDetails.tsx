@@ -7,7 +7,9 @@ import MapView from "../../components/Map/MapView";
 import ComplianceSummary from "../../components/Summary/ComplianceSummary";
 import TripRecap from "../../components/Summary/TripRecap";
 import { useTripStore } from "../../store/tripStore";
+import { useToastStore } from "../../store/toastStore";
 import type { DailyLog, Activity } from "../../core/types/trip";
+
 
 
 type DutyEntry = {
@@ -66,8 +68,10 @@ function formatLogs(dailyLogs: DailyLog[]): {
 export default function TripDetails() {
   const navigate = useNavigate();
   const { currentTrip } = useTripStore();
+  const showToast = useToastStore((state) => state.showToast);
 
   if (!currentTrip) {
+     showToast("No trip data found, please plan a new trip.", "error");
     navigate("/");
     return null;
   }
